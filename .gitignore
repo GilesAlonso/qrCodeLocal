@@ -1,16 +1,8 @@
-# Node modules
-node_modules/
-
-# Build outputs
-dist/
-build/
-*.min.js
-
 # OS files
 .DS_Store
 Thumbs.db
 
-# Editor files
+# Editor directories and files
 .vscode/
 .idea/
 *.swp
@@ -18,12 +10,16 @@ Thumbs.db
 *~
 
 # Logs
+logs/
 *.log
 npm-debug.log*
 
-# Environment files
-.env
-.env.local
+# Optional npm cache directory
+node_modules/
 
-# Coverage
-coverage/
+# Optional eslint cache
+.eslintcache
+
+# Build outputs
+dist/
+build/

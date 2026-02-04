@@ -1,123 +1,124 @@
 # QR Code Generator
 
-A zero-dependency QR code generator built with vanilla HTML, CSS, and JavaScript. Encode text, URLs, and other data into QR codes without any external libraries or frameworks.
+A zero-dependency QR code generator built entirely with vanilla HTML, CSS, and JavaScript. Generate QR codes instantly in your browser without any external libraries or server requests.
 
 ## Features
 
-- **Zero Dependencies**: Built entirely with vanilla JavaScript - no external libraries or frameworks
-- **Multiple Data Types**: Supports numeric, alphanumeric, and byte encoding modes
-- **Error Correction Levels**: Four levels of error correction (L, M, Q, H)
-- **Automatic Version Selection**: Automatically selects the optimal QR code version (1-10)
-- **Optimal Masking**: Evaluates all 8 mask patterns and selects the one with the lowest penalty score
-- **Canvas Rendering**: Renders QR codes on HTML5 canvas for high-quality output
-- **PNG Export**: Download generated QR codes as PNG images
-- **Clipboard Support**: Copy QR codes directly to the clipboard
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Dark Mode**: Automatically adapts to system color preferences
+- **Zero Dependencies**: Built from scratch using only vanilla JavaScript
+- **Privacy Focused**: All generation happens client-side - no data leaves your browser
+- **Multiple Error Correction Levels**: Low (L), Medium (M), Quartile (Q), High (H)
+- **Customizable Size**: Choose from 200×200, 300×300, 400×400, or 500×500 pixels
+- **Export Options**: Download as PNG or copy directly to clipboard
+- **Responsive Design**: Works beautifully on desktop and mobile devices
+- **Real-time Generation**: QR codes update instantly as you type
 
 ## Usage
 
-### Basic Usage
+### Online
 
-1. Open `index.html` in a web browser
-2. Enter text or URL in the input field
-3. Select an error correction level:
-   - **Low (7%)**: Best for clean environments, allows most data
-   - **Medium (15%)**: Good balance, suitable for most use cases
-   - **Quartile (25%)**: Better error recovery for slightly damaged codes
-   - **High (30%)**: Maximum error recovery for harsh environments
-4. The QR code generates automatically (or click "Generate QR Code")
-5. Download as PNG or copy to clipboard
+Simply open `index.html` in any modern web browser.
 
-### Error Correction Levels
+### Local Development
 
-Choose the appropriate error correction level based on your use case:
+1. Clone or download this repository
+2. Open `index.html` in your browser
+3. Enter text or URL in the input field
+4. Select your preferred error correction level and size
+5. The QR code will be generated automatically
+6. Download as PNG or copy to clipboard
 
-- **L (Low)**: ~7% of data can be restored. Use when the QR code will be printed in clean conditions and scanned with good quality cameras.
+## Error Correction Levels
 
-- **M (Medium)**: ~15% of data can be restored. The default choice for most applications. Good balance between capacity and error recovery.
+- **Low (L)**: 7% error correction - Allows recovery of up to 7% of data
+- **Medium (M)**: 15% error correction - Allows recovery of up to 15% of data (default)
+- **Quartile (Q)**: 25% error correction - Allows recovery of up to 25% of data
+- **High (H)**: 30% error correction - Allows recovery of up to 30% of data
 
-- **Q (Quartile)**: ~25% of data can be restored. Use when the QR code might be partially obscured or damaged.
+Higher error correction levels result in larger QR codes but are more resilient to damage or obstruction.
 
-- **H (High)**: ~30% of data can be restored. Best for industrial environments or when the QR code might be significantly damaged.
+## Technical Details
 
-### Keyboard Shortcuts
+### Supported QR Code Versions
 
-- **Ctrl + Enter**: Generate QR code while typing
+This generator supports QR code versions 1-10, which can encode up to approximately 652 characters (depending on error correction level).
 
-## Technical Implementation
+### Implementation
 
-### QR Code Algorithm
+The implementation includes:
 
-This implementation follows the ISO/IEC 18004 QR Code specification and includes:
-
-1. **Data Encoding**: Automatic mode detection and encoding for:
-   - Numeric mode (digits 0-9)
-   - Alphanumeric mode (0-9, A-Z, and special characters)
-   - Byte mode (any 8-bit character)
-
-2. **Error Correction**: Reed-Solomon algorithm implementation for:
-   - Generator polynomial generation
-   - Galois Field arithmetic (GF(256))
-   - Error correction codeword calculation
-
-3. **Matrix Generation**:
-   - Finder patterns (position detection patterns)
-   - Timing patterns
-   - Alignment patterns (for version 2+)
-   - Format information encoding
-   - Version information encoding (for version 7+)
-
-4. **Mask Pattern Selection**: Evaluates all 8 mask patterns using penalty scoring:
-   - Line penalty (consecutive modules)
-   - Block penalty (finder-like patterns)
-   - Finder pattern penalty
-   - Balance penalty (module distribution)
-
-5. **Data Placement**: Zig-zag data placement with module bit encoding
-
-### File Structure
-
-```
-├── index.html      # Main HTML structure
-├── styles.css      # Responsive styling with dark mode support
-├── qr-code.js      # QR code generation algorithm
-├── app.js          # UI logic and canvas rendering
-└── README.md       # This file
-```
+- **Data Encoding**: Supports numeric, alphanumeric, and byte modes
+- **Error Correction**: Full Reed-Solomon error correction algorithm
+- **Matrix Generation**: Complete QR code matrix with:
+  - Finder patterns (position detection patterns)
+  - Alignment patterns
+  - Timing patterns
+  - Format information
+  - Version information (for larger versions)
+- **Masking**: Automatic selection of optimal masking pattern
+- **Canvas Rendering**: High-quality PNG output
 
 ### Browser Compatibility
 
 Works in all modern browsers that support:
-- Canvas API
-- Clipboard API (with fallback for older browsers)
-- ES6+ JavaScript
+- ES6 JavaScript
+- HTML5 Canvas API
+- Clipboard API (for copy functionality)
 
 Tested on:
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
 
-### Performance
+## File Structure
 
-QR code generation is instantaneous for typical use cases:
-- Text lengths under 500 characters: < 10ms
-- Text lengths under 1000 characters: < 50ms
-- Maximum capacity (Version 10): ~150ms
+```
+.
+├── index.html      # Main HTML structure
+├── styles.css      # Responsive styling
+├── qr-code.js      # QR code generation algorithm
+├── app.js          # UI logic and interaction
+└── README.md       # Documentation
+```
+
+## Code Architecture
+
+### QRCode Class (`qr-code.js`)
+
+Implements the core QR code specification:
+- `generate(data, errorLevel)`: Main entry point for QR code generation
+- Data encoding for numeric, alphanumeric, and byte modes
+- Reed-Solomon error correction calculation
+- Matrix construction with all required patterns
+- Format and version information encoding
+
+### QRCodeApp Class (`app.js`)
+
+Handles UI interaction:
+- Event listeners for input changes
+- Canvas rendering
+- Download and copy functionality
+- Status messages and error handling
 
 ## Limitations
 
-- Supports QR code versions 1-10 (up to ~300 characters depending on content and error correction)
-- Does not support:
-  - Kanji mode encoding
-  - Micro QR codes
-  - Structured append (multi-QR codes)
-  - ECI (Extended Channel Interpretation) mode
+- Maximum data length: ~650 characters (varies by error correction level)
+- Only supports versions 1-10 of QR code specification
+- No support for structured append (splitting data across multiple QR codes)
+- No support for micro QR codes
+
+## Future Enhancements
+
+Potential improvements for future versions:
+- Support for larger QR code versions (11-40)
+- Custom colors for QR codes
+- Logo/image overlay support
+- Batch generation
+- SVG export format
 
 ## License
 
-This project is provided as-is for educational and commercial use.
+Free to use for personal and commercial projects.
 
 ## Credits
 
-Implementation based on the ISO/IEC 18004 QR Code specification and follows the standard QR code encoding algorithm.
+Built entirely from scratch following the ISO/IEC 18004 QR Code specification. No external libraries or frameworks were used.

@@ -1,97 +1,80 @@
 class QRCodeApp {
     constructor() {
         this.qrCode = new QRCode();
-        this.initializeElements();
-        this.attachEventListeners();
-        this.canvasSize = 300;
-    }
-
-    initializeElements() {
-        this.textInput = document.getElementById('textInput');
-        this.errorLevel = document.getElementById('errorLevel');
-        this.generateBtn = document.getElementById('generateBtn');
-        this.downloadBtn = document.getElementById('downloadBtn');
-        this.copyBtn = document.getElementById('copyBtn');
         this.canvas = document.getElementById('qrCanvas');
         this.ctx = this.canvas.getContext('2d');
+        this.dataInput = document.getElementById('dataInput');
+        this.errorLevel = document.getElementById('errorLevel');
+        this.size = document.getElementById('size');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.copyBtn = document.getElementById('copyBtn');
         this.placeholder = document.getElementById('placeholder');
-        this.qrContainer = document.getElementById('qrContainer');
+        this.status = document.getElementById('status');
+        
+        this.init();
     }
 
-    attachEventListeners() {
-        this.generateBtn.addEventListener('click', () => this.generateQRCode());
-        this.downloadBtn.addEventListener('click', () => this.downloadQRCode());
+    init() {
+        this.dataInput.addEventListener('input', () => this.generateQR());
+        this.errorLevel.addEventListener('change', () => this.generateQR());
+        this.size.addEventListener('change', () => this.generateQR());
+        this.downloadBtn.addEventListener('click', () => this.downloadQR());
         this.copyBtn.addEventListener('click', () => this.copyToClipboard());
         
-        this.textInput.addEventListener('input', () => this.handleInput());
-        this.errorLevel.addEventListener('change', () => this.handleInput());
-
-        this.textInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                this.generateQRCode();
-            }
-        });
+        this.generateQR();
     }
 
-    handleInput() {
-        if (this.textInput.value.trim() === '') {
-            this.showPlaceholder();
-        } else {
-            this.generateQRCode();
-        }
-    }
-
-    generateQRCode() {
-        const text = this.textInput.value.trim();
-        const ecLevel = this.errorLevel.value;
-
-        if (!text) {
+    generateQR() {
+        const data = this.dataInput.value.trim();
+        const errorLevel = this.errorLevel.value;
+        const size = parseInt(this.size.value);
+        
+        if (!data) {
             this.showPlaceholder();
             return;
         }
 
         try {
-            const result = this.qrCode.generate(text, ecLevel);
-            this.renderQRCode(result.matrix);
-            this.showQRCode();
+            this.showStatus('Generating...');
+            
+            setTimeout(() => {
+                try {
+                    const matrix = this.qrCode.generate(data, errorLevel);
+                    this.renderQR(matrix, size);
+                    this.hidePlaceholder();
+                    this.enableButtons();
+                    this.showStatus('QR code generated successfully!', 'success');
+                    setTimeout(() => this.hideStatus(), 2000);
+                } catch (error) {
+                    console.error('QR generation error:', error);
+                    this.showStatus('Error: Text too long. Please use shorter text.', 'error');
+                }
+            }, 10);
         } catch (error) {
-            console.error('Error generating QR code:', error);
-            this.showError(error.message);
+            console.error('QR generation error:', error);
+            this.showStatus('Error: Text too long. Please use shorter text.', 'error');
         }
     }
 
-    renderQRCode(matrix) {
-        const size = matrix.length;
-        const moduleSize = this.canvasSize / size;
+    renderQR(matrix, size) {
+        const moduleSize = Math.floor(size / matrix.length);
+        const qrSize = moduleSize * matrix.length;
         
-        this.canvas.width = this.canvasSize;
-        this.canvas.height = this.canvasSize;
+        this.canvas.width = qrSize;
+        this.canvas.height = qrSize;
         
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillRect(0, 0, this.canvasSize, this.canvasSize);
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(0, 0, qrSize, qrSize);
         
         this.ctx.fillStyle = '#000000';
         
-        for (let row = 0; row < size; row++) {
-            for (let col = 0; col < size; col++) {
-                if (matrix[row][col] === 1) {
-                    this.ctx.fillRect(
-                        Math.floor(col * moduleSize),
-                        Math.floor(row * moduleSize),
-                        Math.ceil(moduleSize),
-                        Math.ceil(moduleSize)
-                    );
+        for (let y = 0; y < matrix.length; y++) {
+            for (let x = 0; x < matrix.length; x++) {
+                if (matrix[y][x] === 1) {
+                    this.ctx.fillRect(x * moduleSize, y * moduleSize, moduleSize, moduleSize);
                 }
             }
         }
-    }
-
-    showQRCode() {
-        this.canvas.style.display = 'block';
-        this.placeholder.style.display = 'none';
-        this.downloadBtn.disabled = false;
-        this.copyBtn.disabled = false;
-        this.qrContainer.style.background = '#ffffff';
     }
 
     showPlaceholder() {
@@ -99,123 +82,64 @@ class QRCodeApp {
         this.placeholder.style.display = 'flex';
         this.downloadBtn.disabled = true;
         this.copyBtn.disabled = true;
-        this.qrContainer.style.background = '#f8fafc';
     }
 
-    showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.style.cssText = `
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-top: 16px;
-            text-align: center;
-            border: 1px solid #fecaca;
-        `;
-        errorDiv.textContent = message;
-
-        const existingError = this.qrContainer.querySelector('.error-message');
-        if (existingError) {
-            existingError.remove();
-        }
-
-        this.qrContainer.style.background = '#fef2f2';
-        this.canvas.style.display = 'none';
-        this.placeholder.style.display = 'flex';
-        this.placeholder.querySelector('p').textContent = message;
-        this.placeholder.querySelector('svg').style.display = 'none';
-        this.downloadBtn.disabled = true;
-        this.copyBtn.disabled = true;
+    hidePlaceholder() {
+        this.canvas.style.display = 'block';
+        this.placeholder.style.display = 'none';
     }
 
-    downloadQRCode() {
-        try {
-            const link = document.createElement('a');
-            link.download = this.generateFileName();
-            link.href = this.canvas.toDataURL('image/png');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (error) {
-            console.error('Error downloading QR code:', error);
-            this.showError('Failed to download QR code');
-        }
+    enableButtons() {
+        this.downloadBtn.disabled = false;
+        this.copyBtn.disabled = false;
     }
 
-    generateFileName() {
-        const text = this.textInput.value.trim();
-        const timestamp = new Date().toISOString().slice(0, 10);
+    downloadQR() {
+        const data = this.dataInput.value.trim();
+        const filename = `qrcode-${Date.now()}.png`;
         
-        let sanitizedText = text
-            .replace(/[^a-zA-Z0-9]/g, '_')
-            .slice(0, 30);
-        
-        if (sanitizedText.length === 0) {
-            sanitizedText = 'qrcode';
-        }
-        
-        return `${sanitizedText}_${timestamp}.png`;
+        this.canvas.toBlob((blob) => {
+            if (blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                this.showStatus('Downloaded!', 'success');
+                setTimeout(() => this.hideStatus(), 1500);
+            }
+        }, 'image/png');
     }
 
     async copyToClipboard() {
         try {
-            const blob = await new Promise(resolve => {
-                this.canvas.toBlob(resolve, 'image/png');
-            });
-
             if (navigator.clipboard && navigator.clipboard.write) {
-                const item = new ClipboardItem({ 'image/png': blob });
-                await navigator.clipboard.write([item]);
-                this.showCopySuccess();
+                const blob = await new Promise(resolve => this.canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                this.showStatus('Copied to clipboard!', 'success');
+                setTimeout(() => this.hideStatus(), 1500);
             } else {
-                throw new Error('Clipboard API not supported');
+                this.showStatus('Clipboard not supported in this browser', 'error');
             }
         } catch (error) {
-            console.error('Error copying to clipboard:', error);
-            this.fallbackCopy();
+            console.error('Clipboard error:', error);
+            this.showStatus('Failed to copy. Try downloading instead.', 'error');
         }
     }
 
-    fallbackCopy() {
-        try {
-            const dataUrl = this.canvas.toDataURL('image/png');
-            
-            const tempInput = document.createElement('input');
-            tempInput.value = dataUrl;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            const success = document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            if (success) {
-                this.showCopySuccess();
-            } else {
-                throw new Error('Copy command failed');
-            }
-        } catch (error) {
-            console.error('Fallback copy failed:', error);
-            this.showError('Failed to copy to clipboard. Try downloading instead.');
-        }
+    showStatus(message, type = 'info') {
+        this.status.textContent = message;
+        this.status.className = `status ${type}`;
+        this.status.style.display = 'block';
     }
 
-    showCopySuccess() {
-        const originalText = this.copyBtn.innerHTML;
-        this.copyBtn.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            Copied!
-        `;
-        this.copyBtn.style.borderColor = '#10b981';
-        this.copyBtn.style.color = '#10b981';
-
-        setTimeout(() => {
-            this.copyBtn.innerHTML = originalText;
-            this.copyBtn.style.borderColor = '';
-            this.copyBtn.style.color = '';
-        }, 2000);
+    hideStatus() {
+        this.status.style.display = 'none';
     }
 }
 
