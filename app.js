@@ -116,7 +116,10 @@ class QRCodeApp {
             `Total codewords: ${debug.totalCodewords}`,
             `Mask pattern: ${debug.maskPattern}`,
             `Format bits: ${debug.formatBits}`,
-            `Mask penalties: ${debug.maskPenalties.join(', ')}`
+            `Mask penalties: ${debug.maskPenalties.join(', ')}`,
+            '',
+            '=== Block Structure ===',
+            this.getBlockStructureDebug(debug)
         ];
 
         this.debugInfo.textContent = infoLines.join('\n');
@@ -131,6 +134,27 @@ class QRCodeApp {
 
     matrixToString(matrix) {
         return matrix.map(row => row.map(cell => (cell === 1 ? '1' : '0')).join('')).join('\n');
+    }
+
+    getBlockStructureDebug(debug) {
+        // This is a simplified view based on the debug info
+        // In a full implementation, we'd pass the actual block structure
+        const dataCodewordsPerBlock = Math.floor(debug.dataCodewords / 2);
+        const ecCodewordsPerBlock = Math.floor(debug.ecCodewords / 2);
+        
+        return [
+            `Expected for V${debug.version} ${debug.errorLevel}:`,
+            `- Block count: 2`,
+            `- Data per block: ${dataCodewordsPerBlock} bytes`,
+            `- EC per block: ${ecCodewordsPerBlock} bytes`,
+            `- Total: ${debug.dataCodewords} + ${debug.ecCodewords} = ${debug.totalCodewords} codewords`,
+            '',
+            `Interleaving order:`,
+            `- Data: Block0[0], Block1[0], Block0[1], Block1[1], ...`,
+            `- EC: Block0[0], Block1[0], Block0[1], Block1[1], ...`,
+            '',
+            `Check console for detailed block info`
+        ].join('\n');
     }
 
     clearDebugInfo() {

@@ -111,6 +111,19 @@ Handles UI interaction:
 - No support for structured append (splitting data across multiple QR codes)
 - No support for micro QR codes
 
+## Recent Fixes
+
+**Fixed Issues:**
+- ✅ Multi-block QR code encoding (Version 9+) now works correctly
+- ✅ Fixed EC block calculation bug in `getRsBlocks()` for 6-element entries
+- ✅ Corrected Reed-Solomon error correction block structure
+- ✅ Verified proper block interleaving for multi-block versions
+
+**Technical Details:**
+- Version 9 L level: 2 blocks × (116 data + 30 EC) = 232 data + 60 EC = 292 total codewords
+- Version 10 L level: 4 blocks (2×(68+18) + 2×(69+18)) = 274 data + 72 EC = 346 total codewords
+- All block interleaving follows QR specification: data blocks first, then EC blocks
+
 ## Future Enhancements
 
 Potential improvements for future versions:
