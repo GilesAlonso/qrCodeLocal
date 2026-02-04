@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>QR Code Generator</h1>
+            <p class="subtitle">Generate QR codes instantly - no external dependencies</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="form-group">
+                    <label for="textInput">Text or URL</label>
+                    <textarea 
+                        id="textInput" 
+                        placeholder="Enter text or URL to encode..."
+                        rows="3"
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="errorLevel">Error Correction Level</label>
+                    <select id="errorLevel">
+                        <option value="L">Low (7%)</option>
+                        <option value="M" selected>Medium (15%)</option>
+                        <option value="Q">Quartile (25%)</option>
+                        <option value="H">High (30%)</option>
+                    </select>
+                </div>
+
+                <button id="generateBtn" class="btn btn-primary">Generate QR Code</button>
+            </section>
+
+            <section class="output-section">
+                <div class="qr-container" id="qrContainer">
+                    <canvas id="qrCanvas"></canvas>
+                    <div class="placeholder" id="placeholder">
+                        <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="10" y="10" width="80" height="80" rx="5" stroke="#ccc" stroke-width="4"/>
+                            <rect x="20" y="20" width="20" height="20" fill="#ccc"/>
+                            <rect x="60" y="20" width="20" height="20" fill="#ccc"/>
+                            <rect x="20" y="60" width="20" height="20" fill="#ccc"/>
+                            <rect x="50" y="50" width="10" height="10" fill="#ccc"/>
+                        </svg>
+                        <p>Enter text to generate QR code</p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="downloadBtn" class="btn btn-secondary" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Download PNG
+                    </button>
+                    <button id="copyBtn" class="btn btn-secondary" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                        Copy to Clipboard
+                    </button>
+                </div>
+            </section>
+
+            <section class="info-section">
+                <h3>About</h3>
+                <p>This QR code generator is built with vanilla HTML, CSS, and JavaScript - no external libraries or dependencies. It implements the QR code specification including Reed-Solomon error correction, data encoding, and optimal mask pattern selection.</p>
+                <p><strong>Features:</strong></p>
+                <ul>
+                    <li>Support for text, URLs, and numeric data</li>
+                    <li>Four error correction levels (L, M, Q, H)</li>
+                    <li>Automatic QR version selection (1-10)</li>
+                    <li>Optimal mask pattern selection</li>
+                    <li>PNG download and clipboard copy</li>
+                    <li>Responsive design for mobile and desktop</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>100% Client-Side • No Data Uploaded • Pure Vanilla JS</p>
+        </footer>
+    </div>
+
+    <script src="qr-code.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
