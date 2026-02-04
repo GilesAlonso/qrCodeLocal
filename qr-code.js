@@ -749,23 +749,34 @@ class QRCode {
         const formatBits = ((data << 10) | (bits & 0x3ff)) ^ 0x5412;
         const bitArray = Array.from({ length: 15 }, (_, i) => (formatBits >> i) & 1);
 
+        // Top-left placement: bitArray index maps to bit number (0=LSB, 14=MSB)
+        // QR spec: bit 14 should be placed first (leftmost/upmost)
+        // So we place bitArray[14-i] at position i
         for (let i = 0; i <= 5; i++) {
-            matrix[8][i] = bitArray[i];
+            matrix[8][i] = bitArray[14 - i];
         }
-        matrix[8][7] = bitArray[6];
-        matrix[8][8] = bitArray[7];
-        matrix[7][8] = bitArray[8];
+        matrix[8][7] = bitArray[14 - 6];
+        matrix[8][8] = bitArray[14 - 7];
+        matrix[7][8] = bitArray[14 - 8];
         for (let i = 9; i < 15; i++) {
-            matrix[14 - i][8] = bitArray[i];
+            matrix[14 - i][8] = bitArray[14 - i];
         }
 
+        // Bottom-left and top-right placement
+        // Bottom-left vertical: bits 14-7 go to rows (size-1) down to (size-8)
         for (let i = 0; i < 8; i++) {
-            matrix[size - 1 - i][8] = bitArray[i];
+            matrix[size - 1 - i][8] = bitArray[14 - i];
         }
-        for (let i = 8; i < 15; i++) {
-            matrix[8][size - 15 + i] = bitArray[i];
+        // Top-right horizontal: bits 7-0 go to columns (size-8) through (size-1)
+        // i=7 -> col size-8 (bit 7), i=14 -> col size-1 (bit 0)
+        for (let i = 7; i < 15; i++) {
+            matrix[8][size - 8 + (i - 7)] = bitArray[14 - i];
         }
 
         return bitArray;
     }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = QRCode;
 }
