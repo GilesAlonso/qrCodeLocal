@@ -30,7 +30,7 @@ Simply open `index.html` in any modern web browser.
 
 ## Debugging
 
-Enable "Show debug info" to view encoding metadata, mask penalties, and a copyable 0/1 matrix grid. The matrix output is useful for comparing against other QR implementations or troubleshooting scan issues.
+Enable "Show debug info" to view encoding metadata (mode bits, character count, padding, and pad bytes), mask penalties, and a copyable 0/1 matrix grid. The matrix output is useful for comparing against other QR implementations or troubleshooting scan issues.
 
 ## Error Correction Levels
 
