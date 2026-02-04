@@ -354,6 +354,7 @@ class QRCode {
         const maxEcLength = Math.max(...dataBlocks.map(block => block.ec.length));
         const result = [];
 
+        // Interleave data blocks
         for (let i = 0; i < maxDataLength; i++) {
             for (const block of dataBlocks) {
                 if (i < block.data.length) {
@@ -362,6 +363,7 @@ class QRCode {
             }
         }
 
+        // Interleave EC blocks
         for (let i = 0; i < maxEcLength; i++) {
             for (const block of dataBlocks) {
                 if (i < block.ec.length) {
@@ -369,7 +371,7 @@ class QRCode {
                 }
             }
         }
-
+        
         return result;
     }
 
