@@ -94,7 +94,20 @@ class QRCode {
         const mode = this.getMode(data);
         const modeName = this.getModeName(mode);
         const version = this.getVersion(data.length, mode, errorLevel);
-        const { dataBytes, bitString, capacityBits, dataCodewords } = this.encodeData(data, mode, version, errorLevel);
+        const {
+            dataBytes,
+            bitString,
+            capacityBits,
+            dataCodewords,
+            modeBits,
+            charCountBits,
+            charCountValueBits,
+            dataBits,
+            dataBitsBeforePadding,
+            terminatorBitsAdded,
+            padToByteBits,
+            padBytesUsed
+        } = this.encodeData(data, mode, version, errorLevel);
         const blocks = this.getRsBlocks(version, errorLevel);
         const codewords = this.createCodewords(dataBytes, blocks);
 
@@ -114,6 +127,14 @@ class QRCode {
             version,
             errorLevel,
             matrixSize: matrix.length,
+            modeBits,
+            charCountBits,
+            charCountValueBits,
+            dataPayloadBitsLength: dataBits.length,
+            dataBitsBeforePadding,
+            terminatorBitsAdded,
+            padToByteBits,
+            padBytesUsed,
             dataBitsLength: bitString.length,
             capacityBits,
             dataCodewords,
@@ -125,7 +146,18 @@ class QRCode {
             dataBitString: bitString
         };
 
-        console.debug('[QR] Generated', { mode: modeName, version, errorLevel, maskPattern, dataCodewords });
+        console.debug('[QR] Generated', {
+            mode: modeName,
+            version,
+            errorLevel,
+            maskPattern,
+            dataCodewords,
+            capacityBits,
+            dataBitsBeforePadding,
+            terminatorBitsAdded,
+            padToByteBits,
+            padBytesUsed: padBytesUsed.length
+        });
 
         return { matrix, debug };
     }
@@ -177,20 +209,21 @@ class QRCode {
     }
 
     encodeData(data, mode, version, errorLevel) {
-        let bitString = '';
-
-        bitString += this.toBits(mode, 4);
-
+        const modeBits = this.toBits(mode, 4);
         const charCountBits = this.getCharCountBits(mode, version);
-        bitString += this.toBits(data.length, charCountBits);
+        const charCountValueBits = this.toBits(data.length, charCountBits);
+        let dataBits = '';
 
         if (mode === 1) {
-            bitString += this.encodeNumeric(data);
+            dataBits = this.encodeNumeric(data);
         } else if (mode === 2) {
-            bitString += this.encodeAlphanumeric(data);
+            dataBits = this.encodeAlphanumeric(data);
         } else {
-            bitString += this.encodeByte(data);
+            dataBits = this.encodeByte(data);
         }
+
+        let bitString = modeBits + charCountValueBits + dataBits;
+        const dataBitsBeforePadding = bitString.length;
 
         const blocks = this.getRsBlocks(version, errorLevel);
         const dataCodewords = blocks.reduce((sum, block) => sum + block.dataCount, 0);
@@ -200,22 +233,39 @@ class QRCode {
             throw new Error('Data too long');
         }
 
-        const terminator = Math.min(4, capacityBits - bitString.length);
-        bitString += '0'.repeat(terminator);
+        const terminatorBitsAdded = Math.min(4, capacityBits - bitString.length);
+        bitString += '0'.repeat(terminatorBitsAdded);
 
-        if (bitString.length % 8 !== 0) {
-            bitString += '0'.repeat(8 - (bitString.length % 8));
+        const padToByteBits = (8 - (bitString.length % 8)) % 8;
+        if (padToByteBits !== 0) {
+            bitString += '0'.repeat(padToByteBits);
         }
 
         const padBytes = [0xec, 0x11];
+        const padBytesUsed = [];
         let padIndex = 0;
         while (bitString.length < capacityBits) {
-            bitString += padBytes[padIndex % 2].toString(2).padStart(8, '0');
+            const padByte = padBytes[padIndex % 2];
+            padBytesUsed.push(padByte);
+            bitString += this.toBits(padByte, 8);
             padIndex++;
         }
 
         const dataBytes = this.bitsToBytes(bitString).slice(0, dataCodewords);
-        return { dataBytes, bitString, capacityBits, dataCodewords };
+        return {
+            dataBytes,
+            bitString,
+            capacityBits,
+            dataCodewords,
+            modeBits,
+            charCountBits,
+            charCountValueBits,
+            dataBits,
+            dataBitsBeforePadding,
+            terminatorBitsAdded,
+            padToByteBits,
+            padBytesUsed
+        };
     }
 
     encodeNumeric(data) {

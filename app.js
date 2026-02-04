@@ -94,12 +94,23 @@ class QRCodeApp {
     displayDebugInfo(matrix, debug) {
         if (!debug) return;
 
+        const padBytesDisplay = debug.padBytesUsed.length
+            ? debug.padBytesUsed.map((byte) => `0x${byte.toString(16).padStart(2, '0')}`).join(', ')
+            : 'None';
+
         const infoLines = [
             `Mode: ${debug.modeName} (${debug.mode})`,
+            `Mode bits: ${debug.modeBits}`,
             `Version: ${debug.version}`,
             `Error correction: ${debug.errorLevel}`,
             `Matrix size: ${debug.matrixSize}x${debug.matrixSize}`,
-            `Data bits: ${debug.dataBitsLength}/${debug.capacityBits}`,
+            `Char count (${debug.charCountBits} bits): ${debug.charCountValueBits}`,
+            `Data payload bits: ${debug.dataPayloadBitsLength}`,
+            `Bits before padding: ${debug.dataBitsBeforePadding}/${debug.capacityBits}`,
+            `Terminator bits added: ${debug.terminatorBitsAdded}`,
+            `Pad-to-byte bits added: ${debug.padToByteBits}`,
+            `Pad bytes: ${padBytesDisplay}`,
+            `Final data bits: ${debug.dataBitsLength}/${debug.capacityBits}`,
             `Data codewords: ${debug.dataCodewords}`,
             `EC codewords: ${debug.ecCodewords}`,
             `Total codewords: ${debug.totalCodewords}`,
