@@ -238,6 +238,73 @@ footer p {
     color: var(--text-secondary);
 }
 
+.debug-section {
+    width: 100%;
+    margin-top: 16px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+}
+
+.debug-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 12px;
+}
+
+.debug-panel {
+    display: none;
+    gap: 16px;
+    flex-direction: column;
+}
+
+.debug-card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.debug-card h3 {
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.debug-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+#debugInfo {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+}
+
+#matrixOutput {
+    width: 100%;
+    min-height: 200px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.7rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px;
+    background: #fff;
+    color: var(--text-color);
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+}
+
 @media (max-width: 480px) {
     body {
         padding: 10px;

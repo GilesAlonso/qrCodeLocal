@@ -10,6 +10,11 @@ class QRCodeApp {
         this.copyBtn = document.getElementById('copyBtn');
         this.placeholder = document.getElementById('placeholder');
         this.status = document.getElementById('status');
+        this.debugToggle = document.getElementById('debugToggle');
+        this.debugPanel = document.getElementById('debugPanel');
+        this.debugInfo = document.getElementById('debugInfo');
+        this.matrixOutput = document.getElementById('matrixOutput');
+        this.copyMatrixBtn = document.getElementById('copyMatrixBtn');
         
         this.init();
     }
@@ -20,6 +25,9 @@ class QRCodeApp {
         this.size.addEventListener('change', () => this.generateQR());
         this.downloadBtn.addEventListener('click', () => this.downloadQR());
         this.copyBtn.addEventListener('click', () => this.copyToClipboard());
+        this.debugToggle.addEventListener('change', () => this.toggleDebugPanel());
+        this.copyMatrixBtn.addEventListener('click', () => this.copyMatrixToClipboard());
+        this.toggleDebugPanel();
         
         this.generateQR();
     }
@@ -31,6 +39,7 @@ class QRCodeApp {
         
         if (!data) {
             this.showPlaceholder();
+            this.clearDebugInfo();
             return;
         }
 
@@ -39,8 +48,9 @@ class QRCodeApp {
             
             setTimeout(() => {
                 try {
-                    const matrix = this.qrCode.generate(data, errorLevel);
+                    const { matrix, debug } = this.qrCode.generate(data, errorLevel);
                     this.renderQR(matrix, size);
+                    this.displayDebugInfo(matrix, debug);
                     this.hidePlaceholder();
                     this.enableButtons();
                     this.showStatus('QR code generated successfully!', 'success');
@@ -74,6 +84,65 @@ class QRCodeApp {
                     this.ctx.fillRect(x * moduleSize, y * moduleSize, moduleSize, moduleSize);
                 }
             }
+        }
+    }
+
+    toggleDebugPanel() {
+        this.debugPanel.style.display = this.debugToggle.checked ? 'flex' : 'none';
+    }
+
+    displayDebugInfo(matrix, debug) {
+        if (!debug) return;
+
+        const infoLines = [
+            `Mode: ${debug.modeName} (${debug.mode})`,
+            `Version: ${debug.version}`,
+            `Error correction: ${debug.errorLevel}`,
+            `Matrix size: ${debug.matrixSize}x${debug.matrixSize}`,
+            `Data bits: ${debug.dataBitsLength}/${debug.capacityBits}`,
+            `Data codewords: ${debug.dataCodewords}`,
+            `EC codewords: ${debug.ecCodewords}`,
+            `Total codewords: ${debug.totalCodewords}`,
+            `Mask pattern: ${debug.maskPattern}`,
+            `Format bits: ${debug.formatBits}`,
+            `Mask penalties: ${debug.maskPenalties.join(', ')}`
+        ];
+
+        this.debugInfo.textContent = infoLines.join('\n');
+        this.matrixOutput.value = this.matrixToString(matrix);
+
+        if (this.debugToggle.checked) {
+            this.debugPanel.style.display = 'flex';
+        }
+
+        console.debug('[QR] Matrix\n' + this.matrixOutput.value);
+    }
+
+    matrixToString(matrix) {
+        return matrix.map(row => row.map(cell => (cell === 1 ? '1' : '0')).join('')).join('\n');
+    }
+
+    clearDebugInfo() {
+        this.debugInfo.textContent = '';
+        this.matrixOutput.value = '';
+    }
+
+    async copyMatrixToClipboard() {
+        try {
+            if (!this.matrixOutput.value) {
+                this.showStatus('No matrix data to copy.', 'error');
+                return;
+            }
+            if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                this.showStatus('Clipboard not supported in this browser', 'error');
+                return;
+            }
+            await navigator.clipboard.writeText(this.matrixOutput.value);
+            this.showStatus('Matrix copied to clipboard!', 'success');
+            setTimeout(() => this.hideStatus(), 1500);
+        } catch (error) {
+            console.error('Copy matrix error:', error);
+            this.showStatus('Failed to copy matrix.', 'error');
         }
     }
 
