@@ -63,6 +63,26 @@
                 </div>
 
                 <div id="status" class="status"></div>
+
+                <div class="debug-section">
+                    <label class="debug-toggle">
+                        <input type="checkbox" id="debugToggle">
+                        Show debug info
+                    </label>
+                    <div id="debugPanel" class="debug-panel">
+                        <div class="debug-card">
+                            <h3>Encoding Details</h3>
+                            <pre id="debugInfo"></pre>
+                        </div>
+                        <div class="debug-card">
+                            <div class="debug-header">
+                                <h3>Matrix (0/1)</h3>
+                                <button id="copyMatrixBtn" class="btn btn-secondary btn-small" type="button">Copy Matrix</button>
+                            </div>
+                            <textarea id="matrixOutput" readonly rows="12"></textarea>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 

@@ -9,6 +9,7 @@ A zero-dependency QR code generator built entirely with vanilla HTML, CSS, and J
 - **Multiple Error Correction Levels**: Low (L), Medium (M), Quartile (Q), High (H)
 - **Customizable Size**: Choose from 200×200, 300×300, 400×400, or 500×500 pixels
 - **Export Options**: Download as PNG or copy directly to clipboard
+- **Debug Panel**: Inspect encoding metadata and copy the matrix as 0/1 values
 - **Responsive Design**: Works beautifully on desktop and mobile devices
 - **Real-time Generation**: QR codes update instantly as you type
 
@@ -26,6 +27,10 @@ Simply open `index.html` in any modern web browser.
 4. Select your preferred error correction level and size
 5. The QR code will be generated automatically
 6. Download as PNG or copy to clipboard
+
+## Debugging
+
+Enable "Show debug info" to view encoding metadata, mask penalties, and a copyable 0/1 matrix grid. The matrix output is useful for comparing against other QR implementations or troubleshooting scan issues.
 
 ## Error Correction Levels
 
