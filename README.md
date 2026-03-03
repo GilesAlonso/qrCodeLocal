@@ -45,7 +45,7 @@ Higher error correction levels result in larger QR codes but are more resilient 
 
 ### Supported QR Code Versions
 
-This generator supports QR code versions 1-10, which can encode up to approximately 652 characters (depending on error correction level).
+This generator supports QR code versions 1-40, which can encode up to approximately 2,953 bytes or 4,296 alphanumeric characters (depending on error correction level).
 
 ### Implementation
 
@@ -106,19 +106,15 @@ Handles UI interaction:
 
 ## Limitations
 
-- Maximum data length: ~650 characters (varies by error correction level)
-- Only supports versions 1-10 of QR code specification
+- Maximum data length: ~2,953 bytes / ~4,296 alphanumeric chars (varies by error correction level)
 - No support for structured append (splitting data across multiple QR codes)
 - No support for micro QR codes
 
 ## Recent Fixes
 
-**QR Code Scannability (v1–v10):**
-- ✅ Fixed `addReservedAreas` reserving 8 bottom-left format info positions instead of 7, which shifted all data bit placement by one cell
-- ✅ Fixed `addDarkModule` being overwritten by `addReservedAreas` (swapped call order)
-- ✅ Fixed `addFormatInfo` writing 8 bits to the bottom-left area instead of 7, overwriting the dark module
-- ✅ Fixed `isOverlap` incorrectly preventing alignment patterns from being placed on the timing pattern (affected version 7+)
-- ✅ All versions 1–10 now generate scannable QR codes, verified against the `qrcode-generator` reference library and `jsQR` decoder
+**Full QR Spec Coverage (v1–v40):**
+- ✅ Extended RS block table, capacity table, and alignment pattern positions from v10 to v40
+- ✅ All versions 1–40 now generate scannable QR codes, verified with `jsQR` decoder
 
 **Multi-block Encoding (v9+):**
 - ✅ Multi-block QR code encoding (Version 9+) now works correctly
