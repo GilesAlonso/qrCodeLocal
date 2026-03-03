@@ -27,7 +27,7 @@
                         <div class="capacity-bar">
                             <div class="capacity-bar-fill" id="capacityBar"></div>
                         </div>
-                        <span id="charMax">/ 271</span>
+                        <span id="charMax">/ 2331</span>
                     </div>
                 </div>
 
@@ -41,7 +41,6 @@
                             <option value="H">High (30%)</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="size">Size</label>
                         <select id="size">
@@ -50,6 +49,23 @@
                             <option value="400">400 px</option>
                             <option value="500">500 px</option>
                         </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Logo (optional)</label>
+                    <div class="logo-upload" id="logoUpload">
+                        <input type="file" id="logoInput" accept="image/*" hidden>
+                        <div class="logo-drop" id="logoDrop">
+                            <span class="logo-drop-text">Click or drag an image to add a logo<br><small>PNG or SVG
+                                    recommended · square works best</small></span>
+                        </div>
+                        <div class="logo-preview" id="logoPreview" style="display:none">
+                            <img id="logoThumb" alt="Logo preview">
+                            <button type="button" class="logo-remove" id="logoRemove" title="Remove logo">✕</button>
+                        </div>
+                    </div>
+                    <div class="logo-hint" id="logoHint" style="display:none">EC auto-set to High for logo scannability
                     </div>
                 </div>
             </div>

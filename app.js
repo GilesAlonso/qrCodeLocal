@@ -20,9 +20,16 @@ class QRCodeApp {
         this.charMax = document.getElementById('charMax');
         this.capacityBar = document.getElementById('capacityBar');
 
-        // Max byte-mode characters per EC level (version 10 is max supported)
-        // Computed from rsBlockTable: total data codewords minus 3 bytes overhead
-        // (4-bit mode indicator + 8-bit char count for v1-9 byte or 16-bit for v10)
+        // Logo elements
+        this.logoInput = document.getElementById('logoInput');
+        this.logoDrop = document.getElementById('logoDrop');
+        this.logoPreview = document.getElementById('logoPreview');
+        this.logoThumb = document.getElementById('logoThumb');
+        this.logoRemove = document.getElementById('logoRemove');
+        this.logoHint = document.getElementById('logoHint');
+        this.logoImage = null;
+        this.previousEcLevel = null;
+
         this.maxCapacity = this.computeMaxCapacities();
 
         this.init();
@@ -57,6 +64,27 @@ class QRCodeApp {
         this.copyBtn.addEventListener('click', () => this.copyToClipboard());
         this.debugToggle.addEventListener('change', () => this.toggleDebugPanel());
         this.copyMatrixBtn.addEventListener('click', () => this.copyMatrixToClipboard());
+
+        // Logo events
+        this.logoDrop.addEventListener('click', () => this.logoInput.click());
+        this.logoInput.addEventListener('change', (e) => this.handleLogoFile(e.target.files[0]));
+        this.logoRemove.addEventListener('click', () => this.removeLogo());
+
+        // Drag and drop
+        this.logoDrop.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            this.logoDrop.classList.add('drag-over');
+        });
+        this.logoDrop.addEventListener('dragleave', () => {
+            this.logoDrop.classList.remove('drag-over');
+        });
+        this.logoDrop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            this.logoDrop.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) this.handleLogoFile(file);
+        });
+
         this.toggleDebugPanel();
 
         this.updateCharCounter();
@@ -141,6 +169,66 @@ class QRCodeApp {
                 }
             }
         }
+
+        // Draw logo overlay
+        if (this.logoImage) {
+            const logoMaxSize = Math.floor(qrSize * 0.2);
+            const imgW = this.logoImage.naturalWidth;
+            const imgH = this.logoImage.naturalHeight;
+            const scale = Math.min(logoMaxSize / imgW, logoMaxSize / imgH);
+            const drawW = Math.floor(imgW * scale);
+            const drawH = Math.floor(imgH * scale);
+            const pad = Math.ceil(moduleSize * 1.5);
+            const cx = Math.floor((qrSize - drawW) / 2);
+            const cy = Math.floor((qrSize - drawH) / 2);
+
+            // White background with padding
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.fillRect(cx - pad, cy - pad, drawW + pad * 2, drawH + pad * 2);
+
+            // Draw logo
+            this.ctx.drawImage(this.logoImage, cx, cy, drawW, drawH);
+        }
+    }
+
+    handleLogoFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                this.logoImage = img;
+                this.logoThumb.src = e.target.result;
+                this.logoDrop.style.display = 'none';
+                this.logoPreview.style.display = 'flex';
+                this.logoHint.style.display = 'block';
+
+                // Auto-switch to High EC
+                this.previousEcLevel = this.errorLevel.value;
+                this.errorLevel.value = 'H';
+                this.updateCharCounter();
+                this.generateQR();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    removeLogo() {
+        this.logoImage = null;
+        this.logoInput.value = '';
+        this.logoThumb.src = '';
+        this.logoDrop.style.display = '';
+        this.logoPreview.style.display = 'none';
+        this.logoHint.style.display = 'none';
+
+        // Restore previous EC level
+        if (this.previousEcLevel) {
+            this.errorLevel.value = this.previousEcLevel;
+            this.previousEcLevel = null;
+        }
+        this.updateCharCounter();
+        this.generateQR();
     }
 
     toggleDebugPanel() {
