@@ -113,16 +113,18 @@ Handles UI interaction:
 
 ## Recent Fixes
 
-**Fixed Issues:**
+**QR Code Scannability (v1–v10):**
+- ✅ Fixed `addReservedAreas` reserving 8 bottom-left format info positions instead of 7, which shifted all data bit placement by one cell
+- ✅ Fixed `addDarkModule` being overwritten by `addReservedAreas` (swapped call order)
+- ✅ Fixed `addFormatInfo` writing 8 bits to the bottom-left area instead of 7, overwriting the dark module
+- ✅ Fixed `isOverlap` incorrectly preventing alignment patterns from being placed on the timing pattern (affected version 7+)
+- ✅ All versions 1–10 now generate scannable QR codes, verified against the `qrcode-generator` reference library and `jsQR` decoder
+
+**Multi-block Encoding (v9+):**
 - ✅ Multi-block QR code encoding (Version 9+) now works correctly
 - ✅ Fixed EC block calculation bug in `getRsBlocks()` for 6-element entries
 - ✅ Corrected Reed-Solomon error correction block structure
 - ✅ Verified proper block interleaving for multi-block versions
-
-**Technical Details:**
-- Version 9 L level: 2 blocks × (116 data + 30 EC) = 232 data + 60 EC = 292 total codewords
-- Version 10 L level: 4 blocks (2×(68+18) + 2×(69+18)) = 274 data + 72 EC = 346 total codewords
-- All block interleaving follows QR specification: data blocks first, then EC blocks
 
 ## Future Enhancements
 

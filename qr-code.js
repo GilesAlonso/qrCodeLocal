@@ -371,7 +371,7 @@ class QRCode {
                 }
             }
         }
-        
+
         return result;
     }
 
@@ -383,8 +383,8 @@ class QRCode {
         this.addSeparators(matrix);
         this.addTimingPatterns(matrix, size);
         this.addAlignmentPatterns(matrix, version, size);
-        this.addDarkModule(matrix, version);
         this.addReservedAreas(matrix, version, size);
+        this.addDarkModule(matrix, version);
         this.addVersionInfo(matrix, version, size);
 
         return matrix;
@@ -479,7 +479,6 @@ class QRCode {
         if ((x <= 8 && y <= 8) || (x >= size - 9 && y <= 8) || (x <= 8 && y >= size - 9)) {
             return true;
         }
-        if (x === 6 || y === 6) return true;
         return false;
     }
 
@@ -495,8 +494,10 @@ class QRCode {
             }
         }
 
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 7; i++) {
             matrix[size - 1 - i][8] = -1;
+        }
+        for (let i = 0; i < 8; i++) {
             matrix[8][size - 1 - i] = -1;
         }
 
@@ -764,13 +765,11 @@ class QRCode {
             matrix[14 - i][8] = bitArray[14 - i];
         }
 
-        // Bottom-left and top-right placement
-        // Bottom-left vertical: bits 14-7 go to rows (size-1) down to (size-8)
-        for (let i = 0; i < 8; i++) {
+        // Bottom-left vertical: bits go to rows (size-1) down to (size-7)
+        for (let i = 0; i < 7; i++) {
             matrix[size - 1 - i][8] = bitArray[14 - i];
         }
-        // Top-right horizontal: bits 7-0 go to columns (size-8) through (size-1)
-        // i=7 -> col size-8 (bit 7), i=14 -> col size-1 (bit 0)
+        // Top-right horizontal: cols (size-8) through (size-1)
         for (let i = 7; i < 15; i++) {
             matrix[8][size - 8 + (i - 7)] = bitArray[14 - i];
         }
