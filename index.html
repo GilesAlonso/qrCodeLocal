@@ -1,47 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator</title>
+    <meta name="description"
+        content="Generate QR codes instantly in your browser. Zero dependencies, 100% client-side, no data leaves your device.">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <header>
             <h1>QR Code Generator</h1>
-            <p class="subtitle">Generate QR codes instantly - no data leaves your browser</p>
+            <p class="subtitle">Zero dependencies · 100% client-side · your data stays private</p>
         </header>
 
         <main>
             <div class="input-section">
                 <div class="form-group">
-                    <label for="dataInput">Enter text or URL</label>
-                    <textarea 
-                        id="dataInput" 
-                        placeholder="https://example.com or any text you want to encode"
-                        rows="3"
-                    ></textarea>
+                    <label for="dataInput">Text or URL</label>
+                    <textarea id="dataInput" placeholder="https://example.com or any text…" rows="3"></textarea>
+                    <div class="char-counter">
+                        <span class="count" id="charCount">0</span>
+                        <div class="capacity-bar">
+                            <div class="capacity-bar-fill" id="capacityBar"></div>
+                        </div>
+                        <span id="charMax">/ 271</span>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="errorLevel">Error Correction Level</label>
-                    <select id="errorLevel">
-                        <option value="L">Low (7%)</option>
-                        <option value="M" selected>Medium (15%)</option>
-                        <option value="Q">Quartile (25%)</option>
-                        <option value="H">High (30%)</option>
-                    </select>
-                </div>
+                <div class="options-row">
+                    <div class="form-group">
+                        <label for="errorLevel">Error Correction</label>
+                        <select id="errorLevel">
+                            <option value="L">Low (7%)</option>
+                            <option value="M" selected>Medium (15%)</option>
+                            <option value="Q">Quartile (25%)</option>
+                            <option value="H">High (30%)</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="size">Size (pixels)</label>
-                    <select id="size">
-                        <option value="200">200×200</option>
-                        <option value="300" selected>300×300</option>
-                        <option value="400">400×400</option>
-                        <option value="500">500×500</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="size">Size</label>
+                        <select id="size">
+                            <option value="200">200 px</option>
+                            <option value="300" selected>300 px</option>
+                            <option value="400">400 px</option>
+                            <option value="500">500 px</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -77,7 +86,8 @@
                         <div class="debug-card">
                             <div class="debug-header">
                                 <h3>Matrix (0/1)</h3>
-                                <button id="copyMatrixBtn" class="btn btn-secondary btn-small" type="button">Copy Matrix</button>
+                                <button id="copyMatrixBtn" class="btn btn-secondary btn-small" type="button">Copy
+                                    Matrix</button>
                             </div>
                             <textarea id="matrixOutput" readonly rows="12"></textarea>
                         </div>
@@ -87,11 +97,12 @@
         </main>
 
         <footer>
-            <p>Built with vanilla JavaScript • Zero dependencies • 100% client-side</p>
+            <p>Built with vanilla JavaScript · Zero dependencies · 100% client-side</p>
         </footer>
     </div>
 
     <script src="qr-code.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>

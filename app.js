@@ -15,28 +15,86 @@ class QRCodeApp {
         this.debugInfo = document.getElementById('debugInfo');
         this.matrixOutput = document.getElementById('matrixOutput');
         this.copyMatrixBtn = document.getElementById('copyMatrixBtn');
-        
+
+        this.charCount = document.getElementById('charCount');
+        this.charMax = document.getElementById('charMax');
+        this.capacityBar = document.getElementById('capacityBar');
+
+        // Max byte-mode characters per EC level (version 10 is max supported)
+        // Computed from rsBlockTable: total data codewords minus 3 bytes overhead
+        // (4-bit mode indicator + 8-bit char count for v1-9 byte or 16-bit for v10)
+        this.maxCapacity = this.computeMaxCapacities();
+
         this.init();
     }
 
+    computeMaxCapacities() {
+        // For each EC level, compute the max number of byte-mode characters
+        // that fit in the largest supported version (10)
+        const caps = {};
+        for (const ec of ['L', 'M', 'Q', 'H']) {
+            const blocks = this.qrCode.getRsBlocks(10, ec);
+            let totalData = 0;
+            for (const b of blocks) totalData += b.dataCount;
+            // Byte mode overhead: 4 bits mode + 16 bits count (v10 uses 16-bit count for byte) = 20 bits
+            // So max chars = totalData - ceil(20/8) = totalData - 3
+            // Actually the overhead is within the data: 4+16=20 bits. Remaining = totalData*8 - 20.
+            // Max chars = floor((totalData*8 - 20) / 8) = totalData - 3 (since 20/8 = 2.5, ceil = 3)
+            caps[ec] = totalData - 3;
+        }
+        return caps;
+    }
+
     init() {
-        this.dataInput.addEventListener('input', () => this.generateQR());
-        this.errorLevel.addEventListener('change', () => this.generateQR());
+        this.dataInput.addEventListener('input', () => {
+            this.updateCharCounter();
+            this.generateQR();
+        });
+        this.errorLevel.addEventListener('change', () => {
+            this.updateCharCounter();
+            this.generateQR();
+        });
         this.size.addEventListener('change', () => this.generateQR());
         this.downloadBtn.addEventListener('click', () => this.downloadQR());
         this.copyBtn.addEventListener('click', () => this.copyToClipboard());
         this.debugToggle.addEventListener('change', () => this.toggleDebugPanel());
         this.copyMatrixBtn.addEventListener('click', () => this.copyMatrixToClipboard());
         this.toggleDebugPanel();
-        
+
+        this.updateCharCounter();
         this.generateQR();
+    }
+
+    updateCharCounter() {
+        const text = this.dataInput.value;
+        const len = text.length;
+        const ec = this.errorLevel.value;
+        const max = this.maxCapacity[ec];
+        const pct = max > 0 ? Math.min((len / max) * 100, 100) : 0;
+
+        this.charCount.textContent = len;
+        this.charMax.textContent = '/ ' + max;
+
+        // Set warning / danger states
+        this.charCount.classList.remove('warning', 'danger');
+        this.capacityBar.classList.remove('warning', 'danger');
+
+        if (len > max) {
+            this.charCount.classList.add('danger');
+            this.capacityBar.classList.add('danger');
+        } else if (pct > 80) {
+            this.charCount.classList.add('warning');
+            this.capacityBar.classList.add('warning');
+        }
+
+        this.capacityBar.style.width = pct + '%';
     }
 
     generateQR() {
         const data = this.dataInput.value.trim();
         const errorLevel = this.errorLevel.value;
         const size = parseInt(this.size.value);
-        
+
         if (!data) {
             this.showPlaceholder();
             this.clearDebugInfo();
@@ -45,7 +103,7 @@ class QRCodeApp {
 
         try {
             this.showStatus('Generating...');
-            
+
             setTimeout(() => {
                 try {
                     const { matrix, debug } = this.qrCode.generate(data, errorLevel);
@@ -57,27 +115,27 @@ class QRCodeApp {
                     setTimeout(() => this.hideStatus(), 2000);
                 } catch (error) {
                     console.error('QR generation error:', error);
-                    this.showStatus('Error: Text too long. Please use shorter text.', 'error');
+                    this.showStatus('Text too long for the selected error correction level. Try a shorter text or lower EC.', 'error');
                 }
             }, 10);
         } catch (error) {
             console.error('QR generation error:', error);
-            this.showStatus('Error: Text too long. Please use shorter text.', 'error');
+            this.showStatus('Text too long for the selected error correction level. Try a shorter text or lower EC.', 'error');
         }
     }
 
     renderQR(matrix, size) {
         const moduleSize = Math.floor(size / matrix.length);
         const qrSize = moduleSize * matrix.length;
-        
+
         this.canvas.width = qrSize;
         this.canvas.height = qrSize;
-        
+
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillRect(0, 0, qrSize, qrSize);
-        
+
         this.ctx.fillStyle = '#000000';
-        
+
         for (let y = 0; y < matrix.length; y++) {
             for (let x = 0; x < matrix.length; x++) {
                 if (matrix[y][x] === 1) {
@@ -137,11 +195,9 @@ class QRCodeApp {
     }
 
     getBlockStructureDebug(debug) {
-        // This is a simplified view based on the debug info
-        // In a full implementation, we'd pass the actual block structure
         const dataCodewordsPerBlock = Math.floor(debug.dataCodewords / 2);
         const ecCodewordsPerBlock = Math.floor(debug.ecCodewords / 2);
-        
+
         return [
             `Expected for V${debug.version} ${debug.errorLevel}:`,
             `- Block count: 2`,
@@ -201,7 +257,7 @@ class QRCodeApp {
     downloadQR() {
         const data = this.dataInput.value.trim();
         const filename = `qrcode-${Date.now()}.png`;
-        
+
         this.canvas.toBlob((blob) => {
             if (blob) {
                 const url = URL.createObjectURL(blob);
