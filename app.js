@@ -30,16 +30,14 @@ class QRCodeApp {
 
     computeMaxCapacities() {
         // For each EC level, compute the max number of byte-mode characters
-        // that fit in the largest supported version (10)
+        // that fit in the largest supported version (40)
         const caps = {};
         for (const ec of ['L', 'M', 'Q', 'H']) {
-            const blocks = this.qrCode.getRsBlocks(10, ec);
+            const blocks = this.qrCode.getRsBlocks(40, ec);
             let totalData = 0;
             for (const b of blocks) totalData += b.dataCount;
-            // Byte mode overhead: 4 bits mode + 16 bits count (v10 uses 16-bit count for byte) = 20 bits
-            // So max chars = totalData - ceil(20/8) = totalData - 3
-            // Actually the overhead is within the data: 4+16=20 bits. Remaining = totalData*8 - 20.
-            // Max chars = floor((totalData*8 - 20) / 8) = totalData - 3 (since 20/8 = 2.5, ceil = 3)
+            // Byte mode overhead: 4 bits mode + 16 bits count = 20 bits
+            // Max chars = floor((totalData*8 - 20) / 8) = totalData - 3
             caps[ec] = totalData - 3;
         }
         return caps;
